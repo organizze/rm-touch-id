@@ -16,17 +16,14 @@ typedef void(^RMTouchIDCompletionBlock)(BOOL, NSError*);
 
 + (RMTouchID *) sharedInstance;
 
-// Reason string presented to the user in auth dialog
++ (BOOL) isBiometryEnabled;
+
++ (BOOL) isFaceIdEnabled;
+
 @property (nonatomic, copy) NSString * reason;
 
-// Default value is LAPolicyDeviceOwnerAuthenticationWithBiometrics.
 @property (nonatomic, assign) LAPolicy policy;
 
-// Returns YES if device and Apple ID can use Touch ID. If there is an error, it returns NO and assigns error so that UI can respond accordingly
-+ (BOOL) canAuthenticateWithError:(NSError **) error;
-
-// Authenticate the user by showing the Touch ID dialog and calling your success or failure block.  Failure block will return an NSError with a code of enum type LAError: https://developer.apple.com/library/ios/documentation/LocalAuthentication/Reference/LAContext_Class/index.html#//apple_ref/c/tdef/LAError
-// Use the error to handle different types of failure and fallback authentication.
 - (void) authenticateWithCompletion:(RMTouchIDCompletionBlock) success;
 
 @end

@@ -16,20 +16,8 @@
 
 @implementation RMTouchID
 
-#pragma mark - Static methods
-+ (BOOL) canAuthenticateWithError:(NSError **) error
-{
-    if ([NSClassFromString(@"LAContext") class]) {
-        RMTouchID *instance = [RMTouchID sharedInstance];
-        if ([instance.context canEvaluatePolicy: instance.policy error:error]) {
-            return YES;
-        }
-        return NO;
-    }
-    return NO;
-}
-
 static RMTouchID *sharedInstance;
+
 + (RMTouchID *) sharedInstance
 {
     static dispatch_once_t onceToken;
@@ -40,8 +28,44 @@ static RMTouchID *sharedInstance;
     return sharedInstance;
 }
 
+#pragma mark - Class methods
++ (BOOL) isBiometryEnabled
+{
+    if ([NSClassFromString(@"LAContext") class]) {
+        RMTouchID *instance = [RMTouchID sharedInstance];
+        if ([instance.context canEvaluatePolicy: instance.policy error:nil]) {
+            return YES;
+        }
+        return NO;
+    }
+    return NO;
+}
+
+#pragma mark - Class methods
++ (BOOL) isFaceIdEnabled
+{
+    BOOL isBiometryEnabled = [RMTouchID isBiometryEnabled];
+    
+    if (isBiometryEnabled) {
+        NSString *version = [[UIDevice currentDevice] systemVersion];
+        float versionInFloat = [version floatValue];
+        if (versionInFloat < 11.0) {
+            return NO;
+        } else {
+            RMTouchID *instance = [RMTouchID sharedInstance];
+            if (instance.context.biometryType == LABiometryTypeFaceID) {
+                return YES;
+            } else {
+                return NO;
+            }
+        }
+    }
+    return NO;
+}
+
 #pragma mark - Constructor
-- (instancetype)init{
+- (instancetype) init
+{
     if (self = [super init]) {
         self.context = [[LAContext alloc] init];
         self.policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
