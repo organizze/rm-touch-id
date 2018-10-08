@@ -16,8 +16,6 @@
 
 @implementation RMTouchID
 
-static RMTouchID *sharedInstance;
-
 + (RMTouchID *) sharedInstance
 {
     static RMTouchID *instance = nil;
@@ -54,7 +52,7 @@ static RMTouchID *sharedInstance;
             return NO;
         } else {
             RMTouchID *instance = [RMTouchID sharedInstance];
-            if ([RMTouchID biometryType] == LABiometryTypeFaceID) {
+            if (instance.context.biometryType == LABiometryTypeFaceID) {
                 return YES;
             } else {
                 return NO;
@@ -65,13 +63,15 @@ static RMTouchID *sharedInstance;
     return NO;
 }
 
+
 #pragma mark - Constructor
 - (instancetype) init
 {
     if (self = [super init]) {
         self.context = [[LAContext alloc] init];
         self.policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
-        BOOL _ = [self.context canEvaluatePolicy:self.policy error:nil];
+        [self.context canEvaluatePolicy:self.policy error:nil];
+
     }
 
     return self;
