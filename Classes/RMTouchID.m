@@ -20,12 +20,14 @@ static RMTouchID *sharedInstance;
 
 + (RMTouchID *) sharedInstance
 {
+    static RMTouchID *instance = nil;
     static dispatch_once_t onceToken;
+
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[RMTouchID alloc] init];
+        instance = [[self alloc] init];
     });
 
-    return sharedInstance;
+    return instance;
 }
 
 #pragma mark - Class methods
@@ -33,7 +35,7 @@ static RMTouchID *sharedInstance;
 {
     if ([NSClassFromString(@"LAContext") class]) {
         RMTouchID *instance = [RMTouchID sharedInstance];
-        if ([instance.context canEvaluatePolicy: instance.policy error:nil]) {
+        if ([instance.context canEvaluatePolicy:instance.policy error:nil]) {
             return YES;
         }
         return NO;
@@ -41,11 +43,10 @@ static RMTouchID *sharedInstance;
     return NO;
 }
 
-#pragma mark - Class methods
 + (BOOL) isFaceIdEnabled
 {
     BOOL isBiometryEnabled = [RMTouchID isBiometryEnabled];
-    
+
     if (isBiometryEnabled) {
         NSString *version = [[UIDevice currentDevice] systemVersion];
         float versionInFloat = [version floatValue];
@@ -53,13 +54,14 @@ static RMTouchID *sharedInstance;
             return NO;
         } else {
             RMTouchID *instance = [RMTouchID sharedInstance];
-            if (instance.context.biometryType == LABiometryTypeFaceID) {
+            if ([RMTouchID biometryType] == LABiometryTypeFaceID) {
                 return YES;
             } else {
                 return NO;
             }
         }
     }
+
     return NO;
 }
 
@@ -69,14 +71,15 @@ static RMTouchID *sharedInstance;
     if (self = [super init]) {
         self.context = [[LAContext alloc] init];
         self.policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+        BOOL _ = [self.context canEvaluatePolicy:self.policy error:nil];
     }
+
     return self;
 }
 
 #pragma mark - Authenticate
 - (void) authenticateWithCompletion:(RMTouchIDCompletionBlock) completion
 {
-    self.context = [[LAContext alloc] init];
     [self.context evaluatePolicy: LAPolicyDeviceOwnerAuthentication
                  localizedReason: self.reason
                            reply:^(BOOL authenticated, NSError *error) {
