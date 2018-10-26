@@ -16,16 +16,16 @@
 
 @implementation RMTouchID
 
+static RMTouchID *sharedInstance;
 + (RMTouchID *) sharedInstance
 {
-    static RMTouchID *instance = nil;
     static dispatch_once_t onceToken;
 
     dispatch_once(&onceToken, ^{
-        instance = [[self alloc] init];
+        sharedInstance = [[self alloc] init];
     });
 
-    return instance;
+    return sharedInstance;
 }
 
 #pragma mark - Class methods
